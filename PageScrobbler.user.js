@@ -229,7 +229,7 @@ const resetPageCounter = (pageInfo) => {
 
 const updatePageInfo = async () => {
     let pageInfo = JSON.parse(sessionStorage.getItem("EHPS-Paginator"));
-    if (pageInfo == null) {
+    if (pageInfo == null || (!(window.location.search.includes("&prev=") || window.location.search.includes("&next=")) && pageInfo.knownPages.P1 != (new URL(document.querySelector("#unext").href)).search)) {
         pageInfo = resetPageCounter(pageInfo);
     } else {
         pageInfo.knownPages.min = parseInt(pageInfo.knownPages.min);
@@ -276,9 +276,6 @@ const updatePageInfo = async () => {
         } else {
             let maxGID = parseInt(getMaxGID(document), 10) + 1;
             pageInfo.knownPages[`P${window.currentPage}`] = `?next=${maxGID}`;
-
-            // fix reload page
-            window.history.pushState('forward', null, pageInfo.knownPages[`P${window.currentPage}`]);
         }
 
         if (pageInfo.knownPages.min > window.currentPage) pageInfo.knownPages.min = window.currentPage;
@@ -748,21 +745,13 @@ const updatePageCounter = async () => {
         document.querySelector(".saved-search").style.width = "auto";
     }
 
-    // patch prev and next jumps
-    if (prevurl) prevurl = pageInfo.knownPages[`P${window.currentPage - 1}`];
-    if (nexturl) nexturl = pageInfo.knownPages[`P${window.currentPage + 1}`];
-
     let uprev = document.querySelector("#uprev");
-    if (uprev.localName !== "span") uprev.href = prevurl;
 
     let dprev = document.querySelector("#dprev");
-    if (dprev.localName !== "span") dprev.href = prevurl;
 
     let unext = document.querySelector("#unext");
-    if (unext.localName !== "span") unext.href = nexturl;
 
     let dnext = document.querySelector("#dnext");
-    if (dnext.localName !== "span") dnext.href = nexturl;
 
     // add tab click event handler for page buttons
     document.querySelectorAll('.search-relpager-num td').forEach(function (nav) {
